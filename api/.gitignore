@@ -1,0 +1,18 @@
+# Diretório node_modules
+node_modules/
+
+# Arquivos de log
+*.log
+
+# Arquivos de ambiente
+.env
+
+# Diretório de build
+dist/
+
+# Diretório de cache
+.cache/
+
+# Arquivos do sistema
+.DS_Store
+Thumbs.db
