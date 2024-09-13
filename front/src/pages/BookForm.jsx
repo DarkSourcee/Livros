@@ -7,13 +7,6 @@ const generateRandomBarcode = () => {
   return Math.floor(1000000000000 + Math.random() * 9000000000000).toString();
 };
 
-const generateRandomDate = () => {
-  const start = new Date(2000, 0, 1);
-  const end = new Date();
-  const date = new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));
-  return date.toISOString().split('T')[0];
-};
-
 const BookForm = () => {
   const [bookInfo, setBookInfo] = useState({
     name: '',
@@ -91,27 +84,38 @@ const BookForm = () => {
                   onChange={handleChange}
                   required
                 />
-                {/* Botão para gerar dados com ícone */}
-                <button
+                
+                <FormButton
+                  label="Gerar Dados"
                   type="button"
-                  className="btn btn-primary mt-3 mb-4 d-flex align-items-center justify-content-center"
+                  classButton="btn btn-outline-primary mt-3 mb-4 d-flex align-items-center justify-content-center"
+                  icon="fas fa-random me-2"
                   onClick={generateData}
-                >
-                  <i className="fas fa-random me-2"></i>
-                  Gerar Dados
-                </button>
+                />
+                
                 {/* Visualização do Código de Barras */}
                 {bookInfo.barcode && (
                   <div className="mt-2 text-center">
                     <Barcode value={bookInfo.barcode} />
                   </div>
                 )}
-                <FormButton
-                  label="Enviar"
-                  type="submit"
-                  icon="fas fa-paper-plane"
-                  size="lg"
-                />
+
+                <div className='d-flex justify-content-center gap-2 mt-3'>
+                  <FormButton
+                    label="Enviar"
+                    type="submit"
+                    classButton="btn btn-outline-success mt-3 d-flex align-items-center justify-content-center"
+                    icon="fas fa-paper-plane"
+                  />
+
+                  <FormButton
+                    label="Cancelar"
+                    type="buttons"
+                    classButton="btn btn-outline-danger mt-3 d-flex align-items-center justify-content-center"
+                    icon="fa-solid fa-xmark"
+                  />
+                </div>
+                
               </form>
             </div>
           </div>
