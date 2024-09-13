@@ -1,21 +1,27 @@
 import React, { useState } from 'react';
+import axios from 'axios'; // Importando axios
+import { toast } from 'react-toastify'; // Importando toastify
+import 'react-toastify/dist/ReactToastify.css'; // Importando estilos do toastify
 import FormInput from '../components/FormInput/FormInput';
 import FormButton from '../components/FormButton/FormButton';
 import Barcode from 'react-barcode';
 
+// Função para gerar um código de barras aleatório
 const generateRandomBarcode = () => {
   return Math.floor(1000000000000 + Math.random() * 9000000000000).toString();
 };
 
 const BookForm = () => {
   const [bookInfo, setBookInfo] = useState({
-    name: '',
-    author: '',
-    releaseDate: '',
-    releaseLocation: '',
-    barcode: ''
+    nome: '',
+    autor: '',
+    data_lancamento: '',
+    local_lancamento: '',
+    codigo_barras: ''
+    // numero_edicao: 1
   });
 
+  // Função para lidar com alterações nos campos do formulário
   const handleChange = (e) => {
     const { name, value } = e.target;
     setBookInfo({
@@ -24,14 +30,31 @@ const BookForm = () => {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Dados do livro:', bookInfo);
+    try {
+      console.log('Dados enviados:', bookInfo); // Adicione esta linha para ver o que está sendo enviado
+      const response = await axios.post('http://localhost:9999/api/books', bookInfo);
+      toast.success(`Livro "${response.data.nome}" salvo com sucesso!`);
+      setBookInfo({
+        nome: '',
+        autor: '',
+        data_lancamento: '',
+        local_lancamento: '',
+        codigo_barras: ''
+        // numero_edicao: 1
+      });
+    } catch (error) {
+      toast.error(`Erro: ${errorMessage}`);
+      console.error('Erro:', error.response ? error.response.data : error.message);
+    }
   };
 
+  // Função para gerar dados aleatórios para o formulário
   const generateData = () => {
     setBookInfo({
-      barcode: generateRandomBarcode()
+      ...bookInfo,
+      codigo_barras: generateRandomBarcode()
     });
   };
 
@@ -45,42 +68,42 @@ const BookForm = () => {
               <form onSubmit={handleSubmit}>
                 <FormInput
                   label="Nome"
-                  name="name"
+                  name="nome"
                   id="name"
-                  value={bookInfo.name}
+                  value={bookInfo.nome}
                   onChange={handleChange}
                   required
                 />
                 <FormInput
                   label="Autor"
-                  name="author"
+                  name="autor"
                   id="author"
-                  value={bookInfo.author}
+                  value={bookInfo.autor}
                   onChange={handleChange}
                   required
                 />
                 <FormInput
                   label="Data de Lançamento"
-                  name="releaseDate"
+                  name="data_lancamento"
                   id="releaseDate"
                   type="date"
-                  value={bookInfo.releaseDate}
+                  value={bookInfo.data_lancamento}
                   onChange={handleChange}
                   required
                 />
                 <FormInput
                   label="Local de Lançamento"
-                  name="releaseLocation"
+                  name="local_lancamento"
                   id="releaseLocation"
-                  value={bookInfo.releaseLocation}
+                  value={bookInfo.local_lancamento}
                   onChange={handleChange}
                   required
                 />
                 <FormInput
                   label="Código de Barras"
-                  name="barcode"
+                  name="codigo_barras"
                   id="barcode"
-                  value={bookInfo.barcode}
+                  value={bookInfo.codigo_barras}
                   onChange={handleChange}
                   required
                 />
@@ -94,9 +117,9 @@ const BookForm = () => {
                 />
                 
                 {/* Visualização do Código de Barras */}
-                {bookInfo.barcode && (
+                {bookInfo.codigo_barras && (
                   <div className="mt-2 text-center">
-                    <Barcode value={bookInfo.barcode} />
+                    <Barcode value={bookInfo.codigo_barras} />
                   </div>
                 )}
 
@@ -110,9 +133,16 @@ const BookForm = () => {
 
                   <FormButton
                     label="Cancelar"
-                    type="buttons"
+                    type="button"
                     classButton="btn btn-outline-danger mt-3 d-flex align-items-center justify-content-center"
                     icon="fa-solid fa-xmark"
+                    onClick={() => setBookInfo({
+                      nome: '',
+                      autor: '',
+                      data_lancamento: '',
+                      local_lancamento: '',
+                      codigo_barras: ''
+                    })}
                   />
                 </div>
                 
