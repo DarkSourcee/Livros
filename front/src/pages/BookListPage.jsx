@@ -8,8 +8,10 @@ import confirmDelete from '../components/ConfirmDialog/ConfirmDialog'; // Import
 
 const BookListPage = () => {
   const [books, setBooks] = useState([]);
+  const [filteredBooks, setFilteredBooks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
   const navigate = useNavigate(); // Criar instância de navigate
 
   useEffect(() => {
@@ -17,6 +19,7 @@ const BookListPage = () => {
       try {
         const response = await axios.get('http://localhost:9999/api/books');
         setBooks(response.data);
+        setFilteredBooks(response.data); // Inicializa a lista filtrada
       } catch (error) {
         setError('Erro ao carregar os livros.');
         console.error(error);
@@ -27,6 +30,25 @@ const BookListPage = () => {
 
     fetchBooks();
   }, []);
+
+  useEffect(() => {
+    // Função para filtrar livros com base no termo de busca
+    const filterBooks = () => {
+      if (searchTerm === '') {
+        setFilteredBooks(books);
+      } else {
+        const lowercasedSearchTerm = searchTerm.toLowerCase();
+        const filtered = books.filter(book =>
+          Object.values(book).some(value =>
+            value.toString().toLowerCase().includes(lowercasedSearchTerm)
+          )
+        );
+        setFilteredBooks(filtered);
+      }
+    };
+
+    filterBooks();
+  }, [searchTerm, books]);
 
   const columns = [
     { key: 'nome', label: 'Nome' },
@@ -46,6 +68,7 @@ const BookListPage = () => {
       try {
         await axios.delete(`http://localhost:9999/api/books/${item.id}`);
         setBooks(books.filter(book => book.id !== item.id));
+        setFilteredBooks(filteredBooks.filter(book => book.id !== item.id));
         toast.success('Livro excluído com sucesso!');
       } catch (error) {
         toast.error('Erro ao excluir o livro.');
@@ -67,24 +90,35 @@ const BookListPage = () => {
     return item[key] || 'N/A';
   };
 
+  const handleSearchChange = (e) => {
+    setSearchTerm(e.target.value);
+  };
+
   return (
     <div className="container mt-5">
       <h2 className="text-center mb-4">Lista de Livros</h2>
+      <div className="mb-4">
+        <input
+          type="text"
+          className="form-control"
+          placeholder="Buscar por livro..."
+          value={searchTerm}
+          onChange={handleSearchChange}
+        />
+      </div>
       {loading ? (
         <div className="text-center">Carregando...</div>
       ) : error ? (
         <div className="text-center text-danger">{error}</div>
       ) : (
-        <>
-          <BookTable
-            data={books}
-            columns={columns}
-            renderCell={renderCell}
-            emptyMessage="Nenhum livro encontrado"
-          />
-          <ToastContainer /> 
-        </>
+        <BookTable
+          data={filteredBooks}
+          columns={columns}
+          renderCell={renderCell}
+          emptyMessage="Nenhum livro encontrado"
+        />
       )}
+      <ToastContainer /> 
     </div>
   );
 };
