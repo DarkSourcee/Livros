@@ -1,6 +1,20 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import FormButton from '../FormButton/FormButton';
+import { format } from 'date-fns'; // Ou moment, conforme sua escolha
+
+const formatDate = (date) => {
+  try {
+    const parsedDate = new Date(date);
+    if (isNaN(parsedDate)) {
+      throw new Error('Data inválida');
+    }
+    return format(parsedDate, 'dd/MM/yyyy'); // Ou 'DD/MM/YYYY' se usar moment
+  } catch (e) {
+    console.error('Erro ao formatar a data:', e);
+    return date;
+  }
+};
 
 const GenericTable = ({
   data,
@@ -10,6 +24,15 @@ const GenericTable = ({
   onEdit,
   onDelete
 }) => {
+  const renderCellWithFormat = (item, key) => {
+    const value = renderCell ? renderCell(item, key) : item[key] || 'N/A';
+    // Verifique se a coluna é de data e formate-a
+    if (columns.find(col => col.key === key)?.isDate) {
+      return formatDate(value);
+    }
+    return value;
+  };
+
   return (
     <div className="table-responsive">
       <table className="table table-striped table-bordered">
@@ -27,7 +50,7 @@ const GenericTable = ({
               <tr key={rowIndex}>
                 {columns.map((col, colIndex) => (
                   <td key={colIndex}>
-                    {renderCell ? renderCell(item, col.key) : item[col.key] || 'N/A'}
+                    {renderCellWithFormat(item, col.key)}
                   </td>
                 ))}
                 {(onEdit || onDelete) && (
@@ -73,6 +96,7 @@ GenericTable.propTypes = {
     PropTypes.shape({
       key: PropTypes.string.isRequired,
       label: PropTypes.string.isRequired,
+      isDate: PropTypes.bool // Adicione um campo para indicar se a coluna é de data
     })
   ).isRequired,
   renderCell: PropTypes.func,

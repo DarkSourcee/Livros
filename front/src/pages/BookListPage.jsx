@@ -53,7 +53,7 @@ const BookListPage = () => {
   const columns = [
     { key: 'nome', label: 'Nome' },
     { key: 'autor', label: 'Autor' },
-    { key: 'data_lancamento', label: 'Data de Lançamento' },
+    { key: 'data_lancamento', label: 'Data de Lançamento', isDate: true }, // Indicar que é uma data
     { key: 'local_lancamento', label: 'Local de Lançamento' },
     { key: 'codigo_barras', label: 'Código de Barras' },
     { key: 'actions', label: 'Ações' }
