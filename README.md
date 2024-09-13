@@ -8,3 +8,7 @@ module.exports = {
     DB_PASSWORD="senha banco"
     DB_NAME="nome banco"
 }
+
+Deve criar o banco no MySQL
+
+Após tudo configurado somente rodar o arquivo executar.bat e acessar o link no navegador http://localhost:5173/
