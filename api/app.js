@@ -14,7 +14,7 @@ app.use(cors({ origin: 'http://localhost:5173' }));
 app.use('/api', bookRoutes);
 
 // Inicializar o servidor
-const port = parseInt(process.env.PORT, 10) || 9998;
+const port = parseInt(process.env.PORT, 10);
 app.listen(port, () => {
     console.log(`Server is running on http://localhost:${port}`);
 });
