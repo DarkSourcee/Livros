@@ -1,4 +1,4 @@
-Criar um .env na raiz de api/ e configurar 
+Criar um .env na raiz de api/ e configurar e roda npm i install para baixar os node modules
 
 module.exports = {
     PORT="Porta da aplicação",
