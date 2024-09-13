@@ -1,18 +1,21 @@
-import React, { useEffect, useState } from 'react';
-import BookTable from '../components/BookTable/BookTable';
-import { toast } from 'react-toastify'; // Importando toastify
-import 'react-toastify/dist/ReactToastify.css'; // Importando estilos do toastify
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom'; // Importar useNavigate
 import axios from 'axios';
+import { toast, ToastContainer } from 'react-toastify'; // Importar toast e ToastContainer
+import 'react-toastify/dist/ReactToastify.css'; // Importar o CSS do Toastify
+import BookTable from '../components/BookTable/BookTable';
+import confirmDelete from '../components/ConfirmDialog/ConfirmDialog'; // Importar confirmDelete
 
 const BookListPage = () => {
   const [books, setBooks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const navigate = useNavigate(); // Criar instância de navigate
 
   useEffect(() => {
     const fetchBooks = async () => {
       try {
-        const response = await axios.get('http://localhost:9999/api/books'); // Substitua pelo URL real da API
+        const response = await axios.get('http://localhost:9999/api/books');
         setBooks(response.data);
       } catch (error) {
         setError('Erro ao carregar os livros.');
@@ -25,40 +28,43 @@ const BookListPage = () => {
     fetchBooks();
   }, []);
 
-  // Defina as colunas da tabela
   const columns = [
     { key: 'nome', label: 'Nome' },
     { key: 'autor', label: 'Autor' },
     { key: 'data_lancamento', label: 'Data de Lançamento' },
     { key: 'local_lancamento', label: 'Local de Lançamento' },
-    { key: 'codigo_barras', label: 'Código de Barras' }
+    { key: 'codigo_barras', label: 'Código de Barras' },
+    { key: 'actions', label: 'Ações' }
   ];
 
-  // Função opcional para formatar células
-  const formatCell = (item, key) => {
-    if (key === 'data_lancamento') {
-      return new Date(item[key]).toLocaleDateString();
-    }
-    return item[key] || 'N/A';
-  };
-
-  // Placeholder para funções de edição e exclusão
   const handleEdit = (item) => {
-    console.log('Editar item:', item);
-    // Adicione a lógica para editar o item
+    navigate(`/edit-book/${item.id}`); 
   };
 
-  const handleDelete = async (item) => {
-    if (window.confirm('Tem certeza de que deseja excluir este livro?')) {
+  const handleDelete = (item) => {
+    confirmDelete('Tem certeza que deseja excluir este livro?', async () => {
       try {
         await axios.delete(`http://localhost:9999/api/books/${item.id}`);
-        setBooks((prevBooks) => prevBooks.filter((book) => book.id !== item.id));
-        toast.success(`Livro "${item.nome}" deletado com sucesso!`);
+        setBooks(books.filter(book => book.id !== item.id));
+        toast.success('Livro excluído com sucesso!');
       } catch (error) {
-        setError('Erro ao excluir o livro.');
-        toast.error(`Erro ao deletar o livro: `+error);
+        toast.error('Erro ao excluir o livro.');
+        console.error('Erro ao excluir o livro:', error);
       }
+      toast.dismiss(); // Fechar o toast de confirmação após a exclusão
+    });
+  };
+
+  const renderCell = (item, key) => {
+    if (key === 'actions') {
+      return (
+        <div>
+          <button onClick={() => handleEdit(item)} className="btn btn-outline-primary me-2">Editar</button>
+          <button onClick={() => handleDelete(item)} className="btn btn-outline-danger">Excluir</button>
+        </div>
+      );
     }
+    return item[key] || 'N/A';
   };
 
   return (
@@ -69,14 +75,15 @@ const BookListPage = () => {
       ) : error ? (
         <div className="text-center text-danger">{error}</div>
       ) : (
-        <BookTable
-          data={books}
-          columns={columns}
-          renderCell={formatCell} 
-          emptyMessage="Nenhum livro encontrado" 
-          onEdit={handleEdit} 
-          onDelete={handleDelete} 
-        />
+        <>
+          <BookTable
+            data={books}
+            columns={columns}
+            renderCell={renderCell}
+            emptyMessage="Nenhum livro encontrado"
+          />
+          <ToastContainer /> {/* Adicione o ToastContainer aqui */}
+        </>
       )}
     </div>
   );
