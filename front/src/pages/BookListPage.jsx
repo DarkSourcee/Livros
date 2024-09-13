@@ -1,26 +1,44 @@
 import React, { useEffect, useState } from 'react';
 import BookTable from '../components/BookTable/BookTable';
-// import axios from 'axios';
+import axios from 'axios';
 
 const BookListPage = () => {
   const [books, setBooks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // useEffect(() => {
-  //   const fetchBooks = async () => {
-  //     try {
-  //       const response = await axios.get('https://api.example.com/books'); // Substitua pelo URL real da API
-  //       setBooks(response.data);
-  //     } catch (error) {
-  //       setError('Erro ao carregar os livros.');
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   };
+  useEffect(() => {
+    const fetchBooks = async () => {
+      try {
+        const response = await axios.get('http://localhost:9999/api/books'); // Substitua pelo URL real da API
+        setBooks(response.data);
+      } catch (error) {
+        setError('Erro ao carregar os livros.');
+        console.error(error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  //   fetchBooks();
-  // }, []);
+    fetchBooks();
+  }, []);
+
+  // Defina as colunas da tabela
+  const columns = [
+    { key: 'nome', label: 'Nome' },
+    { key: 'autor', label: 'Autor' },
+    { key: 'data_lancamento', label: 'Data de Lançamento' },
+    { key: 'local_lancamento', label: 'Local de Lançamento' },
+    { key: 'codigo_barras', label: 'Código de Barras' }
+  ];
+
+  // Função opcional para formatar células
+  const formatCell = (item, key) => {
+    if (key === 'data_lancamento') {
+      return new Date(item[key]).toLocaleDateString();
+    }
+    return item[key] || 'N/A';
+  };
 
   return (
     <div className="container mt-5">
@@ -30,7 +48,12 @@ const BookListPage = () => {
       ) : error ? (
         <div className="text-center text-danger">{error}</div>
       ) : (
-        <BookTable books={books} />
+        <BookTable
+          data={books}
+          columns={columns}
+          renderCell={formatCell} // Passa a função de formatação, se necessário
+          emptyMessage="Nenhum livro encontrado" // Mensagem quando não houver dados
+        />
       )}
     </div>
   );

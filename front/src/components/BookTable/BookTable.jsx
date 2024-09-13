@@ -1,33 +1,40 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-const BookTable = ({ books }) => {
+/**
+ * Componente genérico de tabela para exibir dados.
+ *
+ * @param {Object} props
+ * @param {Array} props.data - Array de objetos com os dados a serem exibidos na tabela.
+ * @param {Array} props.columns - Array de objetos definindo as colunas da tabela.
+ * @param {Function} [props.renderCell] - Função opcional para renderizar células individualmente.
+ * @param {String} [props.emptyMessage] - Mensagem para exibir quando não houver dados.
+ */
+const GenericTable = ({ data, columns, renderCell, emptyMessage }) => {
   return (
     <div className="table-responsive">
       <table className="table table-striped table-bordered">
         <thead>
           <tr>
-            <th>Nome</th>
-            <th>Autor</th>
-            <th>Data de Lançamento</th>
-            <th>Local de Lançamento</th>
-            <th>Código de Barras</th>
+            {columns.map((col, index) => (
+              <th key={index}>{col.label}</th>
+            ))}
           </tr>
         </thead>
         <tbody>
-          {books.length > 0 ? (
-            books.map((book, index) => (
-              <tr key={index}>
-                <td>{book.name}</td>
-                <td>{book.author}</td>
-                <td>{book.releaseDate}</td>
-                <td>{book.releaseLocation}</td>
-                <td>{book.barcode}</td>
+          {data.length > 0 ? (
+            data.map((item, rowIndex) => (
+              <tr key={rowIndex}>
+                {columns.map((col, colIndex) => (
+                  <td key={colIndex}>
+                    {renderCell ? renderCell(item, col.key) : item[col.key] || 'N/A'}
+                  </td>
+                ))}
               </tr>
             ))
           ) : (
             <tr>
-              <td colSpan="5" className="text-center">Nenhum livro para exibir</td>
+              <td colSpan={columns.length} className="text-center">{emptyMessage}</td>
             </tr>
           )}
         </tbody>
@@ -36,16 +43,20 @@ const BookTable = ({ books }) => {
   );
 };
 
-BookTable.propTypes = {
-  books: PropTypes.arrayOf(
+GenericTable.propTypes = {
+  data: PropTypes.arrayOf(PropTypes.object).isRequired,
+  columns: PropTypes.arrayOf(
     PropTypes.shape({
-      name: PropTypes.string.isRequired,
-      author: PropTypes.string.isRequired,
-      releaseDate: PropTypes.string.isRequired,
-      releaseLocation: PropTypes.string.isRequired,
-      barcode: PropTypes.string.isRequired
+      key: PropTypes.string.isRequired,
+      label: PropTypes.string.isRequired,
     })
   ).isRequired,
+  renderCell: PropTypes.func,
+  emptyMessage: PropTypes.string,
 };
 
-export default BookTable;
+GenericTable.defaultProps = {
+  emptyMessage: 'Nenhum dado para exibir',
+};
+
+export default GenericTable;
