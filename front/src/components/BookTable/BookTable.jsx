@@ -1,16 +1,15 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import FormButton from '../FormButton/FormButton';
 
-/**
- * Componente genérico de tabela para exibir dados.
- *
- * @param {Object} props
- * @param {Array} props.data - Array de objetos com os dados a serem exibidos na tabela.
- * @param {Array} props.columns - Array de objetos definindo as colunas da tabela.
- * @param {Function} [props.renderCell] - Função opcional para renderizar células individualmente.
- * @param {String} [props.emptyMessage] - Mensagem para exibir quando não houver dados.
- */
-const GenericTable = ({ data, columns, renderCell, emptyMessage }) => {
+const GenericTable = ({
+  data,
+  columns,
+  renderCell,
+  emptyMessage = 'Nenhum dado para exibir',
+  onEdit,
+  onDelete
+}) => {
   return (
     <div className="table-responsive">
       <table className="table table-striped table-bordered">
@@ -19,6 +18,7 @@ const GenericTable = ({ data, columns, renderCell, emptyMessage }) => {
             {columns.map((col, index) => (
               <th key={index}>{col.label}</th>
             ))}
+            {(onEdit || onDelete) && <th>Ações</th>}
           </tr>
         </thead>
         <tbody>
@@ -30,11 +30,35 @@ const GenericTable = ({ data, columns, renderCell, emptyMessage }) => {
                     {renderCell ? renderCell(item, col.key) : item[col.key] || 'N/A'}
                   </td>
                 ))}
+                {(onEdit || onDelete) && (
+                  <td>
+                    {onEdit && (
+                      <FormButton
+                        label="Editar"
+                        onClick={() => onEdit(item)}
+                        icon="fa-solid fa-pen-to-square"
+                        classButton="btn btn-warning"
+                        size="sm"
+                      />
+                    )}
+                    {onDelete && (
+                      <FormButton
+                        label="Excluir"
+                        onClick={() => onDelete(item)}
+                        icon="fa-solid fa-xmark"
+                        classButton="btn btn-danger"
+                        size="sm"
+                      />
+                    )}
+                  </td>
+                )}
               </tr>
             ))
           ) : (
             <tr>
-              <td colSpan={columns.length} className="text-center">{emptyMessage}</td>
+              <td colSpan={columns.length + (onEdit || onDelete ? 1 : 0)} className="text-center">
+                {emptyMessage}
+              </td>
             </tr>
           )}
         </tbody>
@@ -53,10 +77,8 @@ GenericTable.propTypes = {
   ).isRequired,
   renderCell: PropTypes.func,
   emptyMessage: PropTypes.string,
-};
-
-GenericTable.defaultProps = {
-  emptyMessage: 'Nenhum dado para exibir',
+  onEdit: PropTypes.func,
+  onDelete: PropTypes.func,
 };
 
 export default GenericTable;

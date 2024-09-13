@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
-import axios from 'axios'; // Importando axios
-import { toast } from 'react-toastify'; // Importando toastify
-import 'react-toastify/dist/ReactToastify.css'; // Importando estilos do toastify
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import FormInput from '../components/FormInput/FormInput';
 import FormButton from '../components/FormButton/FormButton';
 import Barcode from 'react-barcode';
@@ -17,9 +17,33 @@ const BookForm = () => {
     autor: '',
     data_lancamento: '',
     local_lancamento: '',
-    codigo_barras: ''
-    // numero_edicao: 1
+    codigo_barras: '',
+    numero_edicao: 1
   });
+
+  const [estados, setEstados] = useState([]);
+  const [loadingEstados, setLoadingEstados] = useState(true);
+  const [error, setError] = useState(null);
+
+  // Função para buscar os estados da API
+  useEffect(() => {
+    const fetchEstados = async () => {
+      try {
+        const response = await axios.get('https://servicodados.ibge.gov.br/api/v1/localidades/estados');
+        setEstados(response.data.map((estado) => ({
+          value: estado.sigla,
+          label: estado.nome
+        })));
+      } catch (error) {
+        setError('Erro ao carregar estados.');
+        console.error(error);
+      } finally {
+        setLoadingEstados(false);
+      }
+    };
+
+    fetchEstados();
+  }, []);
 
   // Função para lidar com alterações nos campos do formulário
   const handleChange = (e) => {
@@ -30,6 +54,7 @@ const BookForm = () => {
     });
   };
 
+  // Função para lidar com o envio do formulário
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -41,11 +66,11 @@ const BookForm = () => {
         autor: '',
         data_lancamento: '',
         local_lancamento: '',
-        codigo_barras: ''
-        // numero_edicao: 1
+        codigo_barras: '',
+        numero_edicao: 1
       });
     } catch (error) {
-      toast.error(`Erro: ${errorMessage}`);
+      toast.error(`Erro: ${error.response ? error.response.data : error.message}`);
       console.error('Erro:', error.response ? error.response.data : error.message);
     }
   };
@@ -95,9 +120,11 @@ const BookForm = () => {
                   label="Local de Lançamento"
                   name="local_lancamento"
                   id="releaseLocation"
+                  type="select"
                   value={bookInfo.local_lancamento}
                   onChange={handleChange}
                   required
+                  options={loadingEstados ? [] : estados}
                 />
                 <FormInput
                   label="Código de Barras"
@@ -141,7 +168,8 @@ const BookForm = () => {
                       autor: '',
                       data_lancamento: '',
                       local_lancamento: '',
-                      codigo_barras: ''
+                      codigo_barras: '',
+                      numero_edicao: 1
                     })}
                   />
                 </div>

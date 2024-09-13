@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import BookTable from '../components/BookTable/BookTable';
+import { toast } from 'react-toastify'; // Importando toastify
+import 'react-toastify/dist/ReactToastify.css'; // Importando estilos do toastify
 import axios from 'axios';
 
 const BookListPage = () => {
@@ -40,6 +42,25 @@ const BookListPage = () => {
     return item[key] || 'N/A';
   };
 
+  // Placeholder para funções de edição e exclusão
+  const handleEdit = (item) => {
+    console.log('Editar item:', item);
+    // Adicione a lógica para editar o item
+  };
+
+  const handleDelete = async (item) => {
+    if (window.confirm('Tem certeza de que deseja excluir este livro?')) {
+      try {
+        await axios.delete(`http://localhost:9999/api/books/${item.id}`);
+        setBooks((prevBooks) => prevBooks.filter((book) => book.id !== item.id));
+        toast.success(`Livro "${item.nome}" deletado com sucesso!`);
+      } catch (error) {
+        setError('Erro ao excluir o livro.');
+        toast.error(`Erro ao deletar o livro: `+error);
+      }
+    }
+  };
+
   return (
     <div className="container mt-5">
       <h2 className="text-center mb-4">Lista de Livros</h2>
@@ -51,8 +72,10 @@ const BookListPage = () => {
         <BookTable
           data={books}
           columns={columns}
-          renderCell={formatCell} // Passa a função de formatação, se necessário
-          emptyMessage="Nenhum livro encontrado" // Mensagem quando não houver dados
+          renderCell={formatCell} 
+          emptyMessage="Nenhum livro encontrado" 
+          onEdit={handleEdit} 
+          onDelete={handleDelete} 
         />
       )}
     </div>
