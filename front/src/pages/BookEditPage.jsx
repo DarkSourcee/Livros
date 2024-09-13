@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useParams, useNavigate } from 'react-router-dom';
-import { toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import { toast, ToastContainer } from 'react-toastify'; // Importar toast e ToastContainer
+import 'react-toastify/dist/ReactToastify.css'; // Importar o CSS do Toastify
 import FormInput from '../components/FormInput/FormInput';
 import FormButton from '../components/FormButton/FormButton';
 import Barcode from 'react-barcode';
@@ -11,6 +11,15 @@ import Barcode from 'react-barcode';
 const generateRandomBarcode = () => {
   return Math.floor(1000000000000 + Math.random() * 9000000000000).toString();
 };
+
+const formatDate = (dateString) => {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0'); // Meses começam do zero
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
 
 const BookEditPage = () => {
   const { id } = useParams(); // Obtém o ID do livro da URL
@@ -54,7 +63,13 @@ const BookEditPage = () => {
     const fetchBook = async () => {
       try {
         const response = await axios.get(`http://localhost:9999/api/books/${id}`);
-        console.log('Dados do livro:', response.data); // Verifique se os dados estão corretos
+        // console.log('Dados do livro:', response.data); 
+
+        // Formata a data para o formato yyyy-MM-dd
+        const formattedBookInfo = {
+            ...response.data,
+            data_lancamento: response.data.data_lancamento.split('T')[0]
+        };
         setBookInfo(response.data);
       } catch (error) {
         setError('Erro ao carregar dados do livro.');
@@ -72,18 +87,20 @@ const BookEditPage = () => {
     const { name, value } = e.target;
     setBookInfo({
       ...bookInfo,
-      [name]: value
+      [name]: name === 'data_lancamento' ? new Date(value).toISOString().split('T')[0] : value
     });
-  };
+  };  
 
   // Função para lidar com o envio do formulário
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      console.log('Dados enviados:', bookInfo); // Adicione esta linha para ver o que está sendo enviado
-      const response = await axios.put(`http://localhost:9999/api/books/${id}`, bookInfo);
-      toast.success(`Livro "${response.data.nome}" atualizado com sucesso!`);
-    //   navigate('/books'); // Navega de volta para a lista de livros após o sucesso
+      const response = await axios.put(`http://localhost:9999/api/books/${id}`, {
+        ...bookInfo,
+        data_lancamento: new Date(bookInfo.data_lancamento).toISOString() // Formato completo para envio
+      });
+      toast.success(`Livro atualizado com sucesso!`);
+    //   navigate('/books');
     } catch (error) {
       toast.error(`Erro: ${error.response ? error.response.data : error.message}`);
       console.error('Erro:', error.response ? error.response.data : error.message);
@@ -134,7 +151,7 @@ const BookEditPage = () => {
                     name="data_lancamento"
                     id="releaseDate"
                     type="date"
-                    value={bookInfo.data_lancamento}
+                    value={formatDate(bookInfo.data_lancamento)}
                     onChange={handleChange}
                     required
                   />
@@ -187,6 +204,8 @@ const BookEditPage = () => {
                       icon="fa-solid fa-xmark"
                       onClick={() => navigate('/books')}
                     />
+
+                    <ToastContainer /> 
                   </div>
                   
                 </form>
