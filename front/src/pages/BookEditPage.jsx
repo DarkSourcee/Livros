@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useParams, useNavigate } from 'react-router-dom';
-import { toast, ToastContainer } from 'react-toastify'; // Importar toast e ToastContainer
-import 'react-toastify/dist/ReactToastify.css'; // Importar o CSS do Toastify
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css'; 
 import FormInput from '../components/FormInput/FormInput';
 import FormButton from '../components/FormButton/FormButton';
 import Barcode from 'react-barcode';
@@ -22,8 +22,8 @@ const formatDate = (dateString) => {
   };
 
 const BookEditPage = () => {
-  const { id } = useParams(); // Obtém o ID do livro da URL
-  const navigate = useNavigate(); // Para navegação após o envio do formulário
+  const { id } = useParams(); 
+  const navigate = useNavigate(); 
 
   const [bookInfo, setBookInfo] = useState({
     nome: '',
@@ -75,7 +75,7 @@ const BookEditPage = () => {
         setError('Erro ao carregar dados do livro.');
         console.error(error);
       } finally {
-        setLoadingBook(false); // Atualize o estado de carregamento
+        setLoadingBook(false); 
       }
     };
 
@@ -100,7 +100,6 @@ const BookEditPage = () => {
         data_lancamento: new Date(bookInfo.data_lancamento).toISOString() // Formato completo para envio
       });
       toast.success(`Livro atualizado com sucesso!`);
-    //   navigate('/books');
     } catch (error) {
       toast.error(`Erro: ${error.response ? error.response.data : error.message}`);
       console.error('Erro:', error.response ? error.response.data : error.message);

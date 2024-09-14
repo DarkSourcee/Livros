@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css'; 
 import FormInput from '../components/FormInput/FormInput';
 import FormButton from '../components/FormButton/FormButton';
 import Barcode from 'react-barcode';
@@ -60,7 +60,7 @@ const BookForm = () => {
     try {
       console.log('Dados enviados:', bookInfo); // Adicione esta linha para ver o que está sendo enviado
       const response = await axios.post('http://localhost:9999/api/books', bookInfo);
-      toast.success(`Livro "${response.data.nome}" salvo com sucesso!`);
+      toast.success(`Livro salvo com sucesso!`);
       setBookInfo({
         nome: '',
         autor: '',
@@ -172,6 +172,8 @@ const BookForm = () => {
                       numero_edicao: 1
                     })}
                   />
+
+                  <ToastContainer /> 
                 </div>
                 
               </form>

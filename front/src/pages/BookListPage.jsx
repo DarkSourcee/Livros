@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom'; // Importar useNavigate
+import { useNavigate } from 'react-router-dom'; 
 import axios from 'axios';
-import { toast, ToastContainer } from 'react-toastify'; // Importar toast e ToastContainer
-import 'react-toastify/dist/ReactToastify.css'; // Importar o CSS do Toastify
+import { toast, ToastContainer } from 'react-toastify'; 
+import 'react-toastify/dist/ReactToastify.css';
 import BookTable from '../components/BookTable/BookTable';
-import confirmDelete from '../components/ConfirmDialog/ConfirmDialog'; // Importar confirmDelete
+import confirmDelete from '../components/ConfirmDialog/ConfirmDialog'; 
 
 const BookListPage = () => {
   const [books, setBooks] = useState([]);
@@ -12,14 +12,14 @@ const BookListPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
-  const navigate = useNavigate(); // Criar instância de navigate
+  const navigate = useNavigate(); 
 
   useEffect(() => {
     const fetchBooks = async () => {
       try {
         const response = await axios.get('http://localhost:9999/api/books');
         setBooks(response.data);
-        setFilteredBooks(response.data); // Inicializa a lista filtrada
+        setFilteredBooks(response.data);
       } catch (error) {
         setError('Erro ao carregar os livros.');
         console.error(error);
@@ -32,7 +32,6 @@ const BookListPage = () => {
   }, []);
 
   useEffect(() => {
-    // Função para filtrar livros com base no termo de busca
     const filterBooks = () => {
       if (searchTerm === '') {
         setFilteredBooks(books);
@@ -53,7 +52,7 @@ const BookListPage = () => {
   const columns = [
     { key: 'nome', label: 'Nome' },
     { key: 'autor', label: 'Autor' },
-    { key: 'data_lancamento', label: 'Data de Lançamento', isDate: true }, // Indicar que é uma data
+    { key: 'data_lancamento', label: 'Data de Lançamento', isDate: true }, 
     { key: 'local_lancamento', label: 'Local de Lançamento' },
     { key: 'codigo_barras', label: 'Código de Barras' },
     { key: 'actions', label: 'Ações' }
@@ -71,10 +70,10 @@ const BookListPage = () => {
         setFilteredBooks(filteredBooks.filter(book => book.id !== item.id));
         toast.success('Livro excluído com sucesso!');
       } catch (error) {
-        toast.error('Erro ao excluir o livro.');
+        toast.error('Erro ao excluir o livro.', error);
         console.error('Erro ao excluir o livro:', error);
       }
-      toast.dismiss(); // Fechar o toast de confirmação após a exclusão
+      toast.dismiss(); 
     });
   };
 
