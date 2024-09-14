@@ -1,4 +1,4 @@
-Criar um .env na raiz de api/ e configurar e roda npm i install para baixar os node modules
+Criar um .env na raiz de api/ e configurar e roda npm i install para baixar os node modules no back e front
 
 module.exports = {
     PORT="Porta da aplicação",
@@ -11,4 +11,4 @@ module.exports = {
 
 Deve criar o banco no MySQL
 
-Após tudo configurado somente rodar o arquivo executar.bat e acessar o link no navegador http://localhost:5173/
+após esta configuração somente rodar o .bat que ira crias a tabela e banco e somente acessar http://localhost:5173/ que irá carregar a aplicação
