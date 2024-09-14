@@ -1,4 +1,5 @@
 const Book = require('../models/BookModel');
+const { Op } = require('sequelize'); 
 
 // Validação de dados para a criação de um livro
 const validateBookData = (data) => {
@@ -85,6 +86,21 @@ const updateBook = async (req, res) => {
             return res.status(400).json({ errors });
         }
 
+        const book = await Book.findByPk(req.params.id);
+        if (!book) {
+            return res.status(404).send('Book not found');
+        }
+
+        const existingBookBarras = await Book.findOne({ where: { codigo_barras: req.body.codigo_barras, id: { [Op.ne]: req.params.id } } });
+        if (existingBookBarras) {
+            return res.status(400).json({ error: 'Um livro com este código de barras já existe.' });
+        }
+
+        const existingBookName = await Book.findOne({ where: { nome: req.body.nome, id: { [Op.ne]: req.params.id } } });
+        if (existingBookName) {
+            return res.status(400).json({ error: 'Um livro com este nome já existe.' });
+        }
+
         const [updated] = await Book.update(req.body, {
             where: { id: req.params.id }
         });
@@ -96,7 +112,8 @@ const updateBook = async (req, res) => {
             res.status(404).send('Book not found');
         }
     } catch (err) {
-        res.status(500).send(err.message);
+        console.error('Erro ao atualizar livro:', err);
+        res.status(500).json({ error: 'Internal Server Error', details: err.message });
     }
 };
 
