@@ -70,7 +70,7 @@ const BookForm = () => {
         numero_edicao: 1
       });
     } catch (error) {
-      toast.error(`Erro: ${error.response ? error.response.data : error.message}`);
+      toast.error(`Erro: ${error.response && error.response.data && error.response.data.error ? error.response.data.error : error.message}`);
       console.error('Erro:', error.response ? error.response.data : error.message);
     }
   };

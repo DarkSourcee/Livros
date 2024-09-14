@@ -49,7 +49,7 @@ const BookEditPage = () => {
         })));
       } catch (error) {
         setError('Erro ao carregar estados.');
-        console.error(error);
+        // console.error(error);
       } finally {
         setLoadingEstados(false);
       }
@@ -73,7 +73,7 @@ const BookEditPage = () => {
         setBookInfo(response.data);
       } catch (error) {
         setError('Erro ao carregar dados do livro.');
-        console.error(error);
+        // console.error(error);
       } finally {
         setLoadingBook(false); 
       }
@@ -101,8 +101,8 @@ const BookEditPage = () => {
       });
       toast.success(`Livro atualizado com sucesso!`);
     } catch (error) {
-      toast.error(`Erro: ${error.response ? error.response.data : error.message}`);
-      console.error('Erro:', error.response ? error.response.data : error.message);
+      toast.error(`Erro: ${error.response && error.response.data && error.response.data.error ? error.response.data.error : error.message}`);
+      // console.error('Erro:', error.response ? error.response.data : error.message);
     }
   };
 
