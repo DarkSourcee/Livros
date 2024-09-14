@@ -65,10 +65,16 @@ const createBook = async (req, res) => {
             return res.status(400).json({ error: 'Um livro com este código de barras já existe.' });
         }
 
-        // Verificar se o livro já existe pelo nome
-        const existingBookName = await Book.findOne({ where: { nome: req.body.nome } });
-        if (existingBookName) {
-            return res.status(400).json({ error: 'Um livro com este nome já existe.' });
+        // Verificar se o livro já existe pelo nome e edição
+        const existingBookNameAndEdition = await Book.findOne({ 
+            where: { 
+                nome: req.body.nome,
+                numero_edicao: req.body.numero_edicao
+            }
+        });
+
+        if (existingBookNameAndEdition) {
+            return res.status(400).json({ error: 'Um livro com este nome e edição já existe.' });
         }
 
         const newBook = await Book.create(req.body);
@@ -96,9 +102,16 @@ const updateBook = async (req, res) => {
             return res.status(400).json({ error: 'Um livro com este código de barras já existe.' });
         }
 
-        const existingBookName = await Book.findOne({ where: { nome: req.body.nome, id: { [Op.ne]: req.params.id } } });
-        if (existingBookName) {
-            return res.status(400).json({ error: 'Um livro com este nome já existe.' });
+        // Verificar se o livro já existe pelo nome e edição
+        const existingBookNameAndEdition = await Book.findOne({ 
+            where: { 
+                nome: req.body.nome,
+                numero_edicao: req.body.numero_edicao,
+                id: { [Op.ne]: req.params.id }
+            }
+        });
+        if (existingBookNameAndEdition) {
+            return res.status(400).json({ error: 'Um livro com este nome e edição já existe.' });
         }
 
         const [updated] = await Book.update(req.body, {

@@ -18,7 +18,7 @@ const BookForm = () => {
     data_lancamento: '',
     local_lancamento: '',
     codigo_barras: '',
-    numero_edicao: 1
+    numero_edicao: ''
   });
 
   const [estados, setEstados] = useState([]);
@@ -58,8 +58,12 @@ const BookForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      const dataToSend = {
+        ...bookInfo,
+        numero_edicao: parseInt(bookInfo.numero_edicao, 10) //converter para inteiro
+      };
       console.log('Dados enviados:', bookInfo); // Adicione esta linha para ver o que está sendo enviado
-      const response = await axios.post('http://localhost:9999/api/books', bookInfo);
+      const response = await axios.post('http://localhost:9999/api/books', dataToSend);
       toast.success(`Livro salvo com sucesso!`);
       setBookInfo({
         nome: '',
@@ -67,7 +71,7 @@ const BookForm = () => {
         data_lancamento: '',
         local_lancamento: '',
         codigo_barras: '',
-        numero_edicao: 1
+        numero_edicao: ''
       });
     } catch (error) {
       toast.error(`Erro: ${error.response && error.response.data && error.response.data.error ? error.response.data.error : error.message}`);
@@ -86,7 +90,7 @@ const BookForm = () => {
   return (
     <div className="container mt-5">
       <div className="row justify-content-center">
-        <div className="col-md-8 col-lg-7">
+        <div className="col-md-8 col-lg-9">
           <div className="card p-4 shadow-lg">
             <div className="card-body">
               <h2 className="card-title mb-4 text-center">Cadastro de Livro</h2>
@@ -107,42 +111,66 @@ const BookForm = () => {
                   onChange={handleChange}
                   required
                 />
-                <FormInput
-                  label="Data de Lançamento"
-                  name="data_lancamento"
-                  id="releaseDate"
-                  type="date"
-                  value={bookInfo.data_lancamento}
-                  onChange={handleChange}
-                  required
-                />
-                <FormInput
-                  label="Local de Lançamento"
-                  name="local_lancamento"
-                  id="releaseLocation"
-                  type="select"
-                  value={bookInfo.local_lancamento}
-                  onChange={handleChange}
-                  required
-                  options={loadingEstados ? [] : estados}
-                />
-                <FormInput
-                  label="Código de Barras"
-                  name="codigo_barras"
-                  id="barcode"
-                  value={bookInfo.codigo_barras}
-                  onChange={handleChange}
-                  required
-                />
-                
-                <FormButton
-                  label="Gerar Dados"
-                  type="button"
-                  classButton="btn btn-outline-primary mt-3 mb-4 d-flex align-items-center justify-content-center"
-                  icon="fas fa-random me-2"
-                  onClick={generateData}
-                />
-                
+
+                <div className="row mb-3">
+                  <div className="col-md-4">
+                    <FormInput
+                      label="Data de Lançamento"
+                      name="data_lancamento"
+                      id="releaseDate"
+                      type="date"
+                      value={bookInfo.data_lancamento}
+                      onChange={handleChange}
+                      required
+                    />
+                  </div>
+                  <div className="col-md-2">
+                    <FormInput
+                      label="Edição Nª"
+                      name="numero_edicao"
+                      id="numero_edicao"
+                      type="number"
+                      value={bookInfo.numero_edicao}
+                      onChange={handleChange}
+                      required
+                    />
+                  </div>
+                  <div className="col-md-6">
+                    <FormInput
+                      label="Local de Lançamento"
+                      name="local_lancamento"
+                      id="releaseLocation"
+                      type="select"
+                      value={bookInfo.local_lancamento}
+                      onChange={handleChange}
+                      required
+                      options={loadingEstados ? [] : estados}
+                    />
+                  </div>
+                </div>
+
+                <div className="row mb-3">
+                  <div className="col-md-9">
+                    <FormInput
+                      label="Código de Barras"
+                      name="codigo_barras"
+                      id="barcode"
+                      value={bookInfo.codigo_barras}
+                      onChange={handleChange}
+                      required
+                    />
+                  </div>
+                  <div className="col-md-3 d-flex align-items-center justify-content-center">
+                    <FormButton
+                      label="Gerar Dados"
+                      type="button"
+                      classButton="btn btn-outline-primary mt-3 mb-4 d-flex align-items-center justify-content-center flex-column-reverse"
+                      icon="fas fa-random me-2"
+                      onClick={generateData}
+                    />
+                  </div>
+                </div>
+
                 {/* Visualização do Código de Barras */}
                 {bookInfo.codigo_barras && (
                   <div className="mt-2 text-center">
@@ -169,7 +197,7 @@ const BookForm = () => {
                       data_lancamento: '',
                       local_lancamento: '',
                       codigo_barras: '',
-                      numero_edicao: 1
+                      numero_edicao: ''
                     })}
                   />
 

@@ -6,6 +6,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import FormInput from '../components/FormInput/FormInput';
 import FormButton from '../components/FormButton/FormButton';
 import Barcode from 'react-barcode';
+import confirmDelete from '../components/ConfirmDialog/ConfirmDialog'; 
 
 // Função para gerar um código de barras aleatório
 const generateRandomBarcode = () => {
@@ -16,10 +17,10 @@ const formatDate = (dateString) => {
     if (!dateString) return '';
     const date = new Date(dateString);
     const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0'); // Meses começam do zero
+    const month = String(date.getMonth() + 1).padStart(2, '0'); 
     const day = String(date.getDate()).padStart(2, '0');
     return `${year}-${month}-${day}`;
-  };
+};
 
 const BookEditPage = () => {
   const { id } = useParams(); 
@@ -31,11 +32,11 @@ const BookEditPage = () => {
     data_lancamento: '',
     local_lancamento: '',
     codigo_barras: '',
-    numero_edicao: 1
+    numero_edicao: ''
   });
   const [estados, setEstados] = useState([]);
   const [loadingEstados, setLoadingEstados] = useState(true);
-  const [loadingBook, setLoadingBook] = useState(true); // Adicione o estado de carregamento do livro
+  const [loadingBook, setLoadingBook] = useState(true); 
   const [error, setError] = useState(null);
 
   // Função para buscar os estados da API
@@ -63,14 +64,11 @@ const BookEditPage = () => {
     const fetchBook = async () => {
       try {
         const response = await axios.get(`http://localhost:9999/api/books/${id}`);
-        // console.log('Dados do livro:', response.data); 
-
-        // Formata a data para o formato yyyy-MM-dd
         const formattedBookInfo = {
             ...response.data,
             data_lancamento: response.data.data_lancamento.split('T')[0]
         };
-        setBookInfo(response.data);
+        setBookInfo(formattedBookInfo);
       } catch (error) {
         setError('Erro ao carregar dados do livro.');
         // console.error(error);
@@ -87,7 +85,8 @@ const BookEditPage = () => {
     const { name, value } = e.target;
     setBookInfo({
       ...bookInfo,
-      [name]: name === 'data_lancamento' ? new Date(value).toISOString().split('T')[0] : value
+      [name]: name === 'data_lancamento' ? new Date(value).toISOString().split('T')[0] : 
+              name === 'numero_edicao' ? parseInt(value, 10) : value
     });
   };  
 
@@ -95,14 +94,13 @@ const BookEditPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.put(`http://localhost:9999/api/books/${id}`, {
+      await axios.put(`http://localhost:9999/api/books/${id}`, {
         ...bookInfo,
-        data_lancamento: new Date(bookInfo.data_lancamento).toISOString() // Formato completo para envio
+        data_lancamento: new Date(bookInfo.data_lancamento).toISOString() 
       });
-      toast.success(`Livro atualizado com sucesso!`);
+      toast.success('Livro atualizado com sucesso!');
     } catch (error) {
       toast.error(`Erro: ${error.response && error.response.data && error.response.data.error ? error.response.data.error : error.message}`);
-      // console.error('Erro:', error.response ? error.response.data : error.message);
     }
   };
 
@@ -114,10 +112,26 @@ const BookEditPage = () => {
     });
   };
 
+  // Função para confirmar e excluir o livro
+  const handleDelete = () => {
+    confirmDelete('Tem certeza que deseja excluir este livro?', async () => {
+      try {
+        await axios.delete(`http://localhost:9999/api/books/${id}`);
+        toast.success('Livro excluído com sucesso!');
+        navigate('/');
+      } catch (error) {
+        toast.error(`Erro ao excluir o livro: ${error.response ? error.response.data : error.message}`);
+        console.error('Erro ao excluir o livro:', error);
+      } finally {
+        toast.dismiss(); 
+      }
+    });
+  };
+
   return (
     <div className="container mt-5">
       <div className="row justify-content-center">
-        <div className="col-md-8 col-lg-7">
+        <div className="col-md-8 col-lg-9">
           <div className="card p-4 shadow-lg">
             <div className="card-body">
               <h2 className="card-title mb-4 text-center">Editar Livro</h2>
@@ -145,41 +159,63 @@ const BookEditPage = () => {
                     onChange={handleChange}
                     required
                   />
-                  <FormInput
-                    label="Data de Lançamento"
-                    name="data_lancamento"
-                    id="releaseDate"
-                    type="date"
-                    value={formatDate(bookInfo.data_lancamento)}
-                    onChange={handleChange}
-                    required
-                  />
-                  <FormInput
-                    label="Local de Lançamento"
-                    name="local_lancamento"
-                    id="releaseLocation"
-                    type="select"
-                    value={bookInfo.local_lancamento}
-                    onChange={handleChange}
-                    required
-                    options={estados}
-                  />
-                  <FormInput
-                    label="Código de Barras"
-                    name="codigo_barras"
-                    id="barcode"
-                    value={bookInfo.codigo_barras}
-                    onChange={handleChange}
-                    required
-                  />
-                  
-                  <FormButton
-                    label="Gerar Dados"
-                    type="button"
-                    classButton="btn btn-outline-primary mt-3 mb-4 d-flex align-items-center justify-content-center"
-                    icon="fas fa-random me-2"
-                    onClick={generateData}
-                  />
+                  <div className="row mb-3">
+                    <div className="col-md-4">
+                      <FormInput
+                        label="Data de Lançamento"
+                        name="data_lancamento"
+                        id="releaseDate"
+                        type="date"
+                        value={formatDate(bookInfo.data_lancamento)}
+                        onChange={handleChange}
+                        required
+                      />
+                    </div>
+                    <div className="col-md-2">
+                      <FormInput
+                        label="Edição Nª"
+                        name="numero_edicao"
+                        id="numero_edicao"
+                        type="number"
+                        value={bookInfo.numero_edicao}
+                        onChange={handleChange}
+                        required
+                      />
+                    </div>
+                    <div className="col-md-6">
+                      <FormInput
+                        label="Local de Lançamento"
+                        name="local_lancamento"
+                        id="releaseLocation"
+                        type="select"
+                        value={bookInfo.local_lancamento}
+                        onChange={handleChange}
+                        required
+                        options={estados}
+                      />
+                    </div>
+                  </div>
+                  <div className="row mb-3">
+                    <div className="col-md-9">
+                      <FormInput
+                        label="Código de Barras"
+                        name="codigo_barras"
+                        id="barcode"
+                        value={bookInfo.codigo_barras}
+                        onChange={handleChange}
+                        required
+                      />
+                    </div>
+                    <div className="col-md-3 d-flex align-items-center justify-content-center">
+                      <FormButton
+                        label="Gerar Dados"
+                        type="button"
+                        classButton="btn btn-outline-primary mt-3 mb-4 d-flex align-items-center justify-content-center flex-column-reverse"
+                        icon="fas fa-random me-2"
+                        onClick={generateData}
+                      />
+                    </div>
+                  </div>
                   
                   {/* Visualização do Código de Barras */}
                   {bookInfo.codigo_barras && (
@@ -197,11 +233,19 @@ const BookEditPage = () => {
                     />
 
                     <FormButton
+                      label="Excluir"
+                      type="button"
+                      classButton="btn btn-outline-danger mt-3 d-flex align-items-center justify-content-center"
+                      icon="fa-solid fa-trash"
+                      onClick={handleDelete} 
+                    />
+
+                    <FormButton
                       label="Cancelar"
                       type="button"
                       classButton="btn btn-outline-danger mt-3 d-flex align-items-center justify-content-center"
                       icon="fa-solid fa-xmark"
-                      onClick={() => navigate('/books')}
+                      onClick={() => navigate('/')}
                     />
 
                     <ToastContainer /> 
@@ -209,6 +253,7 @@ const BookEditPage = () => {
                   
                 </form>
               )}
+              <ToastContainer /> 
             </div>
           </div>
         </div>

@@ -5,6 +5,10 @@ import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import BookTable from '../components/BookTable/BookTable';
 import confirmDelete from '../components/ConfirmDialog/ConfirmDialog'; 
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
+import Barcode from 'react-barcode'; 
+import FormButton from '../components/FormButton/FormButton';
 
 const BookListPage = () => {
   const [books, setBooks] = useState([]);
@@ -12,6 +16,7 @@ const BookListPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [generatingPDF, setGeneratingPDF] = useState(false); 
   const navigate = useNavigate(); 
 
   useEffect(() => {
@@ -81,8 +86,23 @@ const BookListPage = () => {
     if (key === 'actions') {
       return (
         <div>
-          <button onClick={() => handleEdit(item)} className="btn btn-outline-primary me-2">Editar</button>
-          <button onClick={() => handleDelete(item)} className="btn btn-outline-danger">Excluir</button>
+          <button 
+            onClick={() => handleEdit(item)} 
+            className={`btn btn-outline-primary me-2 ${generatingPDF ? 'hide-on-pdf' : ''}`}>
+            Editar
+          </button>
+          <button 
+            onClick={() => handleDelete(item)} 
+            className={`btn btn-outline-danger ${generatingPDF ? 'hide-on-pdf' : ''}`}>
+            Excluir
+          </button>
+        </div>
+      );
+    }
+    if (key === 'codigo_barras') {
+      return (
+        <div style={{ width: '120px' }}>
+          <Barcode value={item[key]} width={1} height={30} /> {/* Ajuste o tamanho conforme necessário */}
         </div>
       );
     }
@@ -91,6 +111,37 @@ const BookListPage = () => {
 
   const handleSearchChange = (e) => {
     setSearchTerm(e.target.value);
+  };
+
+  const handlePrintPDF = () => {
+    setGeneratingPDF(true); 
+    const input = document.getElementById('book-list');
+    html2canvas(input, { scale: 2 }).then(canvas => {
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF();
+      const imgWidth = 190; 
+      const pageHeight = 295; 
+      const imgHeight = canvas.height * imgWidth / canvas.width;
+      let heightLeft = imgHeight;
+
+      let position = 0;
+
+      pdf.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
+
+      while (heightLeft >= 0) {
+        position = heightLeft - imgHeight;
+        pdf.addPage();
+        pdf.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+      }
+
+      pdf.save('books-list.pdf');
+      setGeneratingPDF(false); 
+    }).catch(error => {
+      console.error('Erro ao gerar PDF:', error);
+      setGeneratingPDF(false); 
+    });
   };
 
   return (
@@ -105,17 +156,25 @@ const BookListPage = () => {
           onChange={handleSearchChange}
         />
       </div>
+      <FormButton 
+        onClick={handlePrintPDF}
+        classButton='btn btn-primary mb-4'
+        label='Gerar PDF'
+        icon='fa fa-print'
+      />
       {loading ? (
         <div className="text-center">Carregando...</div>
       ) : error ? (
         <div className="text-center text-danger">{error}</div>
       ) : (
-        <BookTable
-          data={filteredBooks}
-          columns={columns}
-          renderCell={renderCell}
-          emptyMessage="Nenhum livro encontrado"
-        />
+        <div id="book-list">
+          <BookTable
+            data={filteredBooks}
+            columns={columns}
+            renderCell={renderCell}
+            emptyMessage="Nenhum livro encontrado"
+          />
+        </div>
       )}
       <ToastContainer /> 
     </div>
