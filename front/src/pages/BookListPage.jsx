@@ -9,6 +9,8 @@ import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import Barcode from 'react-barcode'; 
 import FormButton from '../components/FormButton/FormButton';
+import * as XLSX from 'xlsx';
+import { saveAs } from 'file-saver';
 
 const BookListPage = () => {
   const [books, setBooks] = useState([]);
@@ -144,6 +146,20 @@ const BookListPage = () => {
     });
   };
 
+  const handleExportExcel = () => {
+    const ws = XLSX.utils.json_to_sheet(filteredBooks, {
+      header: columns.map(col => col.key),
+      skipHeader: false
+    });
+
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Livros');
+
+    const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+    const blob = new Blob([wbout], { type: 'application/octet-stream' });
+    saveAs(blob, 'books-list.xlsx');
+  };
+
   return (
     <div className="container mt-5">
       <h2 className="text-center mb-4">Lista de Livros</h2>
@@ -156,12 +172,20 @@ const BookListPage = () => {
           onChange={handleSearchChange}
         />
       </div>
-      <FormButton 
-        onClick={handlePrintPDF}
-        classButton='btn btn-primary mb-4'
-        label='Gerar PDF'
-        icon='fa fa-print'
-      />
+      <div>
+        <FormButton 
+          onClick={handlePrintPDF}
+          classButton='btn btn-primary mb-4'
+          label='Gerar PDF'
+          icon='fa fa-print'
+        />
+        <FormButton 
+          onClick={handleExportExcel}
+          classButton='btn btn-success mb-4 ms-2'
+          label='Exportar Excel'
+          icon='fa fa-file-excel'
+        />
+      </div>
       {loading ? (
         <div className="text-center">Carregando...</div>
       ) : error ? (
