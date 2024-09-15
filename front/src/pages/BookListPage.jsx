@@ -87,15 +87,19 @@ const BookListPage = () => {
   const renderCell = (item, key) => {
     if (key === 'actions') {
       return (
-        <div>
+        <div style={{ display: 'flex', gap: '10px' }}>
           <button 
             onClick={() => handleEdit(item)} 
-            className={`btn btn-outline-primary me-2 ${generatingPDF ? 'hide-on-pdf' : ''}`}>
+            className={`btn btn-outline-primary ${generatingPDF ? 'hide-on-pdf' : ''}`}
+            style={{ flexShrink: 0 }} 
+          >
             Editar
           </button>
           <button 
             onClick={() => handleDelete(item)} 
-            className={`btn btn-outline-danger ${generatingPDF ? 'hide-on-pdf' : ''}`}>
+            className={`btn btn-outline-danger ${generatingPDF ? 'hide-on-pdf' : ''}`}
+            style={{ flexShrink: 0 }} 
+          >
             Excluir
           </button>
         </div>
@@ -103,13 +107,14 @@ const BookListPage = () => {
     }
     if (key === 'codigo_barras') {
       return (
-        <div style={{ width: '120px' }}>
-          <Barcode value={item[key]} width={1} height={30} /> {/* Ajuste o tamanho conforme necessário */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '120px' }}> 
+          <Barcode value={item[key]} width={1} height={50} /> 
         </div>
       );
     }
     return item[key] || 'N/A';
   };
+  
 
   const handleSearchChange = (e) => {
     setSearchTerm(e.target.value);
